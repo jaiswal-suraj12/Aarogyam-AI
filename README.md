@@ -33,9 +33,9 @@ It combines a modern React frontend, a Node.js backend, MongoDB database storage
 
 ## Fitness Coach
 
-![Fitness Coach ](screenshots/fitnesscoach.png)
+![Fitness Coach ](screenshots/aifitnesscoach.png)
 
-## Activity Tracker
+## Activity 
 
 ![Activity](screenshots/activity.png)
 
