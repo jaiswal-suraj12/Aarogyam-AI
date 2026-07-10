@@ -3,7 +3,55 @@
 Aarogyam AI is an intelligent health and fitness web application that helps users track meals, physical activities, personal fitness goals, and weekly health progress.
 
 It combines a modern React frontend, a Node.js backend, MongoDB database storage, JWT authentication, and Google Gemini AI for food image analysis and weekly health reports.
+# 📸 Application Screenshots
 
+## Home Page
+
+![Home](screenshots/home.png)
+
+
+## Ai planner
+
+![AI Planner](screenshots/aiplanner.png)
+
+
+## Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+
+
+## AI Food Analyzer
+
+![Food AI](screenshots/foodanalyzer.png)
+
+
+
+## Weekly Report
+
+![Weekly Report](screenshots/weeklyReport.png)
+
+## Fitness Coach
+
+![Fitness Coach ](screenshots/fitnesscoach.png)
+
+## Activity Tracker
+
+![Activity](screenshots/activity.png)
+
+
+## FoodLog
+
+![FoodLog](screenshots/foodlog.png)
+
+
+## Food History 
+
+![Food History](screenshots/foodhistory.png)
+
+## Profile
+
+![Profile](screenshots/profile.png)
 ## Features
 
 * User signup and login
