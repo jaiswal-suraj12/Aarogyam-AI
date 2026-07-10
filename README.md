@@ -232,7 +232,7 @@ The report is generated using user data stored in MongoDB and Google Gemini AI.
 
 ### 1. Clone the repository
 
-git clone https://github.com/your-username/aarogyam-ai.git
+git clone https://github.com/jaiswal-suraj12/Aarogyam-AI
 cd aarogyam-ai
 
 ### 2. Install frontend dependencies
@@ -258,7 +258,6 @@ MONGODB_URI=mongodb://127.0.0.1:27017/aarogyam_ai
 JWT_SECRET=your_jwt_secret
 GEMINI_API_KEY=your_gemini_api_key
 
-Do not upload the `.env` file to GitHub.
 
 Create a `.gitignore` file inside the backend folder:
 
