@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -9,125 +9,191 @@ import Button from "../components/ui/Button";
 import { analyzeFoodImage } from "../services/imageService";
 
 const FoodAI = () => {
-    const [image, setImage] = useState<File | null>(null);
-    const [preview, setPreview] = useState("");
-    const [result, setResult] = useState("");
-    const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const handleSelect = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const file = e.target.files?.[0];
-
-        if (!file) return;
-
-        if (!file.type.startsWith("image/")) {
-            toast.error("Please choose an image file.");
-            return;
-        }
-
-        if (file.size > 8 * 1024 * 1024) {
-            toast.error("Image is too large. Please choose an image under 8 MB.");
-            return;
-        }
-
-        setImage(file);
-
-        setPreview(URL.createObjectURL(file));
+  // Prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
     };
+  }, [preview]);
 
-    const analyze = async () => {
-        if (!image) {
-            toast.error("Please choose an image.");
-            return;
-        }
+  const handleSelect = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
 
-        setLoading(true);
+    if (!file) return;
 
-        try {
-            const data = await analyzeFoodImage(image);
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file.");
+      return;
+    }
 
-            if (data.success) {
-                setResult(data.response);
-                const analysis = {
-                    id: crypto.randomUUID(),
-                    image: preview,
-                    response: data.response,
-                    createdAt: new Date().toISOString(),
-                };
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be smaller than 8 MB.");
+      return;
+    }
 
-                const existing = JSON.parse(
-                    localStorage.getItem("foodHistory") || "[]"
-                );
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
 
-                localStorage.setItem(
-                    "foodHistory",
-                    JSON.stringify([analysis, ...existing])
-                );
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+    setResult("");
+  };
 
+  const analyze = async () => {
+    if (!image) {
+      toast.error("Please choose an image first.");
+      return;
+    }
 
+    setLoading(true);
 
-                toast.success("Analysis completed!");
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error: any) {
-            console.error("Food analysis error :" ,error);
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : "Server Error"
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+      const data = await analyzeFoodImage(image);
 
-    return (
-        <div className="max-w-5xl mx-auto p-6">
+      if (!data.success) {
+        toast.error(data.message);
+        return;
+      }
 
-            <h1 className="text-3xl font-bold mb-6">
-                🍽️ AI Food Analyzer
-            </h1>
+      setResult(data.response);
 
-            <Card className="p-6">
+      const analysis = {
+        id: crypto.randomUUID(),
+        image: preview,
+        response: data.response,
+        createdAt: new Date().toISOString(),
+      };
 
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleSelect}
-                />
+      const existing = JSON.parse(
+        localStorage.getItem("foodHistory") || "[]"
+      );
 
-                {preview && (
-                    <img
-                        src={preview}
-                        alt="Preview"
-                        className="mt-5 rounded-xl w-72"
-                    />
-                )}
+      localStorage.setItem(
+        "foodHistory",
+        JSON.stringify([analysis, ...existing])
+      );
 
-                <Button
-                    className="mt-6"
-                    onClick={analyze}
-                    disabled={loading}
-                >
-                    {loading
-                        ? "Analyzing..."
-                        : "Analyze Food"}
-                </Button>
+      toast.success("Food analyzed successfully!");
 
-            </Card>
+    } catch (error) {
+      console.error(error);
 
-            {result && (
-                <Card className="mt-6 p-6 prose dark:prose-invert max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {result}
-                    </ReactMarkdown>
-                </Card>
-            )}
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Server Error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto p-6">
+
+      <h1 className="text-3xl font-bold mb-6">
+        🍽️ AI Food Analyzer
+      </h1>
+
+      <Card className="p-6">
+
+        <div className="flex flex-col sm:flex-row gap-4">
+
+          {/* Gallery */}
+          <label className="flex items-center justify-center gap-2 cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-3 rounded-xl transition">
+
+            📁 Choose Image
+
+            <input
+              type="file"
+              accept="image/*"
+              disabled={loading}
+              onChange={handleSelect}
+              className="hidden"
+            />
+
+          </label>
+
+          {/* Camera */}
+          <label className="flex items-center justify-center gap-2 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-xl transition">
+
+            📷 Open Camera
+
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              disabled={loading}
+              onChange={handleSelect}
+              className="hidden"
+            />
+
+          </label>
 
         </div>
-    );
+
+        {/* Selected file */}
+        {image && (
+          <p className="mt-4 text-sm text-slate-500">
+            Selected: <strong>{image.name}</strong>
+          </p>
+        )}
+
+        {/* Preview */}
+        {preview && (
+          <img
+            src={preview}
+            alt="Food Preview"
+            className="mt-5 w-full max-w-sm rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 object-cover"
+          />
+        )}
+
+        {/* Analyze Button */}
+        <Button
+          className="mt-6"
+          onClick={analyze}
+          disabled={loading}
+        >
+          {loading ? (
+            <div className="flex items-center gap-2">
+
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+
+              Analyzing...
+
+            </div>
+          ) : (
+            "Analyze Food"
+          )}
+        </Button>
+
+      </Card>
+
+      {/* AI Result */}
+      {result && (
+        <Card className="mt-6 p-6 prose dark:prose-invert max-w-none">
+
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+          >
+            {result}
+          </ReactMarkdown>
+
+        </Card>
+      )}
+
+    </div>
+  );
 };
 
 export default FoodAI;

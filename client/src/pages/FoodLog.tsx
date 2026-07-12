@@ -3,7 +3,7 @@ import { useAppContext } from "../context/AppContext";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
-import type { FoodEntry } from "../types";
+import { addFoodLog ,deleteFoodLog} from "../services/foodService";
 import { Flame, UtensilsCrossed } from "lucide-react";
 
 const FoodLog = () => {
@@ -30,42 +30,42 @@ const FoodLog = () => {
       0
     );
 
-  const handleAddFood = () => {
-    if (
-      !foodName.trim() ||
-      calories <= 0
-    )
-      return;
+ 
+  const handleAddFood = async () => {
+  if (!foodName.trim() || calories <= 0) return;
 
-    const newFood: FoodEntry = {
-      id: Date.now(),
+  try {
+    const savedFood = await addFoodLog({
       name: foodName.trim(),
       calories,
       mealType,
-      date: new Date().toISOString(),
-      documentId: Date.now().toString(),
-    };
+    });
 
     setAllFoodLogs((prev) => [
-      newFood,
+      savedFood,
       ...prev,
     ]);
 
     setFoodName("");
     setCalories(0);
     setMealType("breakfast");
-  };
 
-  const handleDelete = (
-    id: string | number
-  ) => {
+  } catch (error) {
+    console.error(error);
+  }
+};
+ const handleDelete = async (id: string) => {
+  try {
+    await deleteFoodLog(id);
+
     setAllFoodLogs((prev) =>
-      prev.filter(
-        (food) => food.id !== id
-      )
+      prev.filter((food) => food._id !== id)
     );
-  };
-
+  } catch (error) {
+    console.error(error);
+  }
+};
+  
   const capitalize = (
     value: string
   ) =>
@@ -123,10 +123,10 @@ const FoodLog = () => {
               onChange={(e) =>
                 setMealType(
                   e.target.value as
-                    | "breakfast"
-                    | "lunch"
-                    | "dinner"
-                    | "snack"
+                  | "breakfast"
+                  | "lunch"
+                  | "dinner"
+                  | "snack"
                 )
               }
               className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white"
@@ -198,7 +198,7 @@ const FoodLog = () => {
             {allFoodLogs.map(
               (food) => (
                 <div
-                  key={food.id}
+                  key={food._id}
                   className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3"
                 >
                   <div>
@@ -221,7 +221,7 @@ const FoodLog = () => {
                     <button
                       onClick={() =>
                         handleDelete(
-                          food.id
+                          food._id
                         )
                       }
                       className="text-red-500 hover:text-red-700 transition"

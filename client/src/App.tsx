@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-
+import { useEffect } from "react";
 import Layout from "./pages/Layout";
 import Onboarding from "./pages/Onboarding";
 
@@ -25,7 +25,13 @@ const App = () => {
     user,
     isUserFetched,
     onboardingCompleted,
+    fetchUser,
   } = useAppContext();
+
+  useEffect(() => {
+  fetchUser();
+}, []);
+
   console.log("app user information ", user);
 
 

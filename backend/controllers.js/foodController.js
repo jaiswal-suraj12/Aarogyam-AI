@@ -2,6 +2,11 @@ import FoodLog from "../models/FoodLog.js";
 
 // ADD FOOD
 export const addFoodLog = async (req, res) => {
+ console.log("Food API called");
+  console.log(req.body);
+  console.log(req.userId);
+
+
 try {
 const { name, calories, mealType, date } = req.body;
 
@@ -10,6 +15,7 @@ if (!name || !calories || !mealType) {
     message: "Name, calories and meal type are required",
   });
 }
+console.log("Creating food log...");
 
 const foodLog = await FoodLog.create({
   user: req.userId,
@@ -18,7 +24,7 @@ const foodLog = await FoodLog.create({
   mealType,
   date: date || new Date(),
 });
-
+console.log(foodLog);
 res.status(201).json({
   message: "Food added successfully",
   foodLog,
